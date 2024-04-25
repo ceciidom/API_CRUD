@@ -22,7 +22,7 @@ module.exports.detail = (req, res) => {
     Posts.findById(req.params.id)
     .then((post) => {
         if (post === null) {
-            res.json({message: "user not found"})
+            res.json({message: "Post not found"})
         } else {
             res.json(post)
         }
@@ -41,7 +41,7 @@ module.exports.update = (req, res) => {
         if(user) {
             res.json(user);
         } else {
-            res.status(404).json({message:"user not found"});
+            res.status(404).json({message:"Post not found"});
         }
     })
     .catch(console.error)
