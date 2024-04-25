@@ -1,13 +1,6 @@
-//IMPORTAR EL MODELO DE LA BASE DE DATOS
-//OJO: EXPRESS NO SABE CODIFICAR JSON. USAR MIDDLEWARE
 const Posts = require("../models/schema.model");
 
-const {sessions} = require("../controllers/users.controller");
-
-
 module.exports.create = (req, res) => {
-    console.log("create route executed");
-    console.log(req.body)
     Posts.create(req.body)
     .then((post) => {
         res.json(post)
@@ -17,19 +10,6 @@ module.exports.create = (req, res) => {
     })
 };
 module.exports.list = (req, res) => {
-    console.log("list route executed");
-    //ACT 3. AUTENTICAR USUARIO
-    // -- aqui guardo el token de la cabecera de la petición. 
-    const authHeader = req.header("Authorization");
-    const token = authHeader.split("Bearer ")[1];
-
-    // -- aqui comparo el token recibido con la base de datos en mi cache
-    const session = sessions.find((x) => x.token === token);
-
-    // -- aquí doy las instrucciones de que hacer si el token NO coincide con alguno en la base.
-    if (!session) {
-      res.status(401).json({ message: "unauthorized" });
-    } 
     Posts.find()
     .then((allUsers) => {
         res.json(allUsers);
@@ -38,8 +18,6 @@ module.exports.list = (req, res) => {
             console.error(err);
         });};
     
-    
-
 module.exports.detail = (req, res) => {
     Posts.findById(req.params.id)
     .then((post) => {
@@ -68,6 +46,7 @@ module.exports.update = (req, res) => {
     })
     .catch(console.error)
 };
+
 module.exports.delete = (req, res) => {
     Posts.findByIdAndDelete(req.params.id)
     .then((deletedPost) => {
@@ -85,3 +64,7 @@ module.exports.delete = (req, res) => {
         res.status(500).json({message: "internal server error."})
     })
 };
+
+//IMPORTAR EL MODELO DE LA BASE DE DATOS
+//OJO: EXPRESS NO SABE CODIFICAR JSON. USAR MIDDLEWARE en app.js
+//-- aqui están los 5 controladores para las CRUD operations.

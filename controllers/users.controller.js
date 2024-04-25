@@ -1,10 +1,9 @@
-//importat el modelo de los usuarios
 const User = require("../models/schema.user");
 const { v4: uuidv4 } = require("uuid");
+const {sessions} = require("../middlewares/auth.middlewares")
+
 
 module.exports.users = (req, res) => {
-  console.log("calling from users.controller USERS");
-  //Recibe Body JSON con NAME, EMAIL, PASSWORD, Y BIO
   User.create(req.body)
   .then((user) => {
     res.json(user)
@@ -17,9 +16,9 @@ module.exports.users = (req, res) => {
 };
 
 //general un array para guardar los tokens y a que usuario pertenecen.
-const sessions = [];
 
 module.exports.login = (req, res) => {
+
     console.log("calling from users. controller LOGIN")
 // - Recibe body con email, password
 // - Devuelve HTTP 200 OK con token JWT de sesión si las credenciales son correctas
@@ -45,3 +44,7 @@ module.exports.login = (req, res) => {
 module.exports.sessions = sessions;
 
 //ahora, en posts.controller autenticar usuario antes de mostrar los posts. 
+//importar
+// -- el modelo de los usuarios
+// -- el módulo uuid para crear tokens unicos 
+// -- importar el array sessions de mi middleware the auenticación 
