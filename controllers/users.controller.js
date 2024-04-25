@@ -1,69 +1,47 @@
-//IMPORTAR EL MODELO DE LA BASE DE DATOS
-//OJO: EXPRESS NO SABE CODIFICAR JSON. USAR MIDDLEWARE
-const Posts = require("../models/schema.model");
+//importat el modelo de los usuarios
+const User = require("../models/schema.user");
+const { v4: uuidv4 } = require("uuid");
 
-module.exports.create = (req, res) => {
-    console.log("create route executed");
-    console.log(req.body)
-    Posts.create(req.body)
-    .then((post) => {
-        res.json(post)
-    } )
-    .catch((err) => {
-        res.status(400).json(err)
-    })
+module.exports.users = (req, res) => {
+  console.log("calling from users.controller USERS");
+  //Recibe Body JSON con NAME, EMAIL, PASSWORD, Y BIO
+  User.create(req.body)
+  .then((user) => {
+    res.json(user)
+  })
+  .catch((err) => {
+    res.status(400).json(err)
+  })
+  //No necesita ser autenticada
+  //Almacena el usuario en Base de Datos en memoria cifrando su contraseña (el cifrado de la contraseña es opcional)
 };
-module.exports.list = (req, res) => {
-    console.log("list route executed");
-    Posts.find()
-    .then((allUsers) => {
-        res.json(allUsers);
-    })
-    .catch((err) => {
-        console.error(err);
-    });};
-module.exports.detail = (req, res) => {
-    Posts.findById(req.params.id)
-    .then((post) => {
-        if (post === null) {
-            res.json({message: "user not found"})
-        } else {
-            res.json(post)
-        }
-        
-    }).catch(err => {
-        console.error(err)
-    })
 
-};
-module.exports.update = (req, res) => {
-    Posts.findByIdAndUpdate(req.params.id, req.body, {
-        new: true,
-        runValidators: true,
-    })
-    .then ((user) => {
+//general un array para guardar los tokens y a que usuario pertenecen.
+const sessions = [];
+
+module.exports.login = (req, res) => {
+    console.log("calling from users. controller LOGIN")
+// - Recibe body con email, password
+// - Devuelve HTTP 200 OK con token JWT de sesión si las credenciales son correctas
+// - Devuelve HTTP 400 en caso de error en la validación de datos
+// - Devuelve HTTP 401 si las credenciales no son correctas
+    User.findOne({ email: req.body.email, password: req.body.password })
+    .then((user) => {
         if(user) {
-            res.json(user);
-        } else {
-            res.status(404).json({message:"user not found"});
-        }
-    })
-    .catch(console.error)
-};
-module.exports.delete = (req, res) => {
-    Posts.findByIdAndDelete(req.params.id)
-    .then((deletedPost) => {
-        if (deletedPost){
-                    res
-                      .status(200)
-                      .json({ message: "Post deleted successfully." });
+            //si si existe el usuario crear token 
+            const token = uuidv4();
+
+            //guardar en memoria el user id y su token
+            sessions.push({userId: user.id, token})
+            console.log(sessions)
+            res.json({token})
 
         } else {
-            res.status(404).json({message: "Post not found."})
+            res.status(401).json({message: "invalid credentials"})
         }
     })
-    .catch((err) => {
-        console.error(err);
-        res.status(500).json({message: "internal server error."})
-    })
-};
+
+}
+module.exports.sessions = sessions;
+
+//ahora, en posts.controller autenticar usuario antes de mostrar los posts. 
