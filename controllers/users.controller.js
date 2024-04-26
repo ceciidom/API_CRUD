@@ -24,7 +24,7 @@ module.exports.login = (req, res) => {
       if (!user) {
         return res.status(404).json({ message: "Usuario no encontrado" });
       }
-      // Invoke the comparePasswords middleware to compare passwords
+    //comparePasswords middleware to compare passwords
       req.body.hashedPassword = user.password;
       comparePasswords(req, res, () => {
         // If passwords match, generate a token and store it in memory

@@ -9,10 +9,10 @@ const {checkAuth} = require ("../middlewares/auth.middlewares");
 
 
 router.post("/api/posts", posts.create );
-router.get("/api/posts/detail/:id", posts.detail); 
+router.get("/api/posts/detail/:id", checkAuth, posts.detail); 
 router.get("/api/posts", checkAuth, posts.list);
-router.patch("/api/posts/:id", posts.update);
-router.delete("/api/posts/:id", posts.delete);
+router.patch("/api/posts/:id", checkAuth, posts.update);
+router.delete("/api/posts/:id", checkAuth, posts.delete);
 router.post("/api/users", users.createUser);
 router.post("/api/login", users.login)
 
