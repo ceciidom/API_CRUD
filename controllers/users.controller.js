@@ -8,6 +8,11 @@ module.exports.users = (req, res) => {
     // Crear el usuario en la base de datos
     User.create(req.body)
         .then((user) => {
+
+          //use middlware to send activation mail
+          console.log(
+            `URL de activación: http://localhost:8000/api/activate/${user.id}`
+          );
             res.json(user);
         })
         .catch((err) => {
@@ -24,10 +29,12 @@ module.exports.login = (req, res) => {
       if (!user) {
         return res.status(404).json({ message: "Usuario no encontrado" });
       }
-    //comparePasswords middleware to compare passwords
+      // verificar que la cuenta está activa
+      if(!user.active) {
+        return res.status(401).json({message: "Cuenta inactiva. Por favor, activa tu cuenta para iniciar sesión"})
+      }
       req.body.hashedPassword = user.password;
       comparePasswords(req, res, () => {
-        // If passwords match, generate a token and store it in memory
         const token = uuidv4();
         sessions.push({ userId: user.id, token });
         res.json({ message: "Inicio de sesión exitoso", user, token });
@@ -37,3 +44,21 @@ module.exports.login = (req, res) => {
       res.status(500).json({ message: "Error al buscar usuario", error: err });
     });
 };
+
+//create rouute to acivate user
+module.exports.activateUser = (req, res) => {
+  const userId = req.params.userId;
+  User.findById(userId).then(user => {
+    if(!user.active){
+          user.active = true
+    user.save();
+    res.json({message: "usuario activado exitosamente"})
+    } else {
+      res.json({ message: "El usuario ya estaba activo" });
+    }
+
+  })
+  .catch((err) => {
+    res.status(404).json({ message: "usuario no encontrado" , error: err });
+  })
+}
